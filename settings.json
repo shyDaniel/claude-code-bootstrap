@@ -1,0 +1,68 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "FileEdit(*)",
+      "FileView(*)",
+      "Git(*)",
+      "WebFetch(*)",
+      "WebSearch(*)",
+      "Read(//Users/hanyusong/**)"
+    ],
+    "deny": [
+      "Edit(**/.env)",
+      "Edit(**/.env.*)",
+      "Edit(**/*.pem)",
+      "Edit(**/*.key)",
+      "Edit(**/credentials*)",
+      "Write(**/.env)",
+      "Write(**/.env.*)",
+      "Write(**/*.pem)",
+      "Write(**/*.key)",
+      "Write(**/credentials*)"
+    ],
+    "additionalDirectories": [
+      "/Users/hanyusong/apps/findfantasy/docs",
+      "/Users/hanyusong/.claude/hooks",
+      "/Users/hanyusong/.claude/skills/new-project",
+      "/Users/hanyusong/.claude/rules",
+      "/Users/hanyusong/.claude/agents",
+      "/Users/hanyusong/.claude"
+    ]
+  },
+  "dangerouslySkipPermissions": true,
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    }
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/notify.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/protect-files.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
