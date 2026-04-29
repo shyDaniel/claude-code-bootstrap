@@ -1,4 +1,4 @@
-# Claude Code + Codex Bootstrap
+# agent-bootstrap
 
 Optimized Claude Code and OpenAI Codex configuration. Clone -> run setup -> done.
 
@@ -7,8 +7,8 @@ Optimized Claude Code and OpenAI Codex configuration. Clone -> run setup -> done
 Paste this into any machine with Claude Code and/or Codex installed:
 
 ```bash
-git clone https://github.com/hanyusong/claude-code-bootstrap.git
-cd claude-code-bootstrap
+git clone https://github.com/shyDaniel/agent-bootstrap.git
+cd agent-bootstrap
 bash setup.sh
 ```
 
