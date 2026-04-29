@@ -1,29 +1,53 @@
 #!/bin/bash
-# Prevent accidental edits to sensitive files
-# Reads tool input from stdin (JSON with file_path field)
+# Prevent accidental edits to sensitive files.
+# Supports both Claude Code and Codex hook payloads without requiring jq.
 
-FILE_PATH=$(cat | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+set -euo pipefail
 
-if [ -z "$FILE_PATH" ]; then
-  exit 0
-fi
+INPUT="$(cat)"
 
-# Block edits to sensitive files
-BLOCKED_PATTERNS=(
-  ".env"
-  ".env.*"
-  "*.pem"
-  "*.key"
-  "**/node_modules/**"
-  "**/credentials*"
-  "**/.git/**"
-)
+HOOK_INPUT="$INPUT" node <<'NODE'
+const input = process.env.HOOK_INPUT || '';
 
-for pattern in "${BLOCKED_PATTERNS[@]}"; do
-  if [[ "$FILE_PATH" == $pattern ]]; then
-    echo '{"error": "BLOCKED: Cannot edit protected file: '"$FILE_PATH"'. Remove from protect-files.sh if intentional."}'
-    exit 2
-  fi
-done
+let payload;
+try {
+  payload = JSON.parse(input);
+} catch {
+  process.exit(0);
+}
 
-exit 0
+const hookEvent = payload.hook_event_name || '';
+const toolInput = payload.tool_input || {};
+const targets = [
+  toolInput.file_path,
+  toolInput.path,
+  toolInput.command,
+].filter((value) => typeof value === 'string' && value.length > 0);
+
+if (targets.length === 0) {
+  process.exit(0);
+}
+
+const blocked = [
+  /(^|\/)\.env($|[./\s])/,
+  /\.pem($|\s)/,
+  /\.key($|\s)/,
+  /(^|\/)credentials[^/\s]*/i,
+  /(^|\/)node_modules(\/|$)/,
+  /(^|\/)\.git(\/|$)/,
+];
+
+const target = targets.find((candidate) => blocked.some((pattern) => pattern.test(candidate)));
+
+if (!target) {
+  process.exit(0);
+}
+
+const message = `BLOCKED: Cannot edit protected file: ${target}. Remove from protect-files.sh if intentional.`;
+if (hookEvent === 'PreToolUse') {
+  console.log(JSON.stringify({ decision: 'block', reason: message }));
+} else {
+  console.log(JSON.stringify({ error: message }));
+}
+process.exit(2);
+NODE

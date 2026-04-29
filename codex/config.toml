@@ -1,0 +1,39 @@
+# Codex Bootstrap - installed to $CODEX_HOME/config.toml by setup.sh.
+
+model = "gpt-5.5"
+model_reasoning_effort = "xhigh"
+model_verbosity = "low"
+
+# Low-friction autonomous mode, matching this repo's Claude Code defaults.
+sandbox_mode = "danger-full-access"
+approval_policy = "never"
+web_search = "live"
+
+# setup.sh replaces this placeholder with the absolute installed path.
+model_instructions_file = "__CODEX_DIR__/AGENTS.md"
+notify = ["bash", "__CODEX_DIR__/hooks/notify.sh"]
+
+[features]
+codex_hooks = true
+multi_agent = true
+shell_tool = true
+unified_exec = true
+prevent_idle_sleep = true
+
+[agents]
+max_threads = 6
+max_depth = 1
+
+# Avoid duplicate discovery if an older bootstrap copied this skill under
+# $CODEX_HOME/skills before Codex standardized on ~/.agents/skills.
+[[skills.config]]
+path = "__CODEX_DIR__/skills/new-project/SKILL.md"
+enabled = false
+
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp@latest"]
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["-y", "@playwright/mcp@latest"]

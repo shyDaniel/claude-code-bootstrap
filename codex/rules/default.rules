@@ -1,0 +1,23 @@
+# Codex execpolicy rules. These apply when Codex asks to run commands outside
+# the sandbox; the hook in hooks/protect-files.sh handles file-edit tool calls.
+
+prefix_rule(
+    pattern = ["rm", "-rf", "/"],
+    decision = "forbidden",
+    justification = "Never recursively delete the filesystem root.",
+    match = ["rm -rf /"],
+)
+
+prefix_rule(
+    pattern = ["git", "reset", "--hard"],
+    decision = "prompt",
+    justification = "Hard resets can discard user work and should be explicitly reviewed.",
+    match = ["git reset --hard"],
+)
+
+prefix_rule(
+    pattern = ["git", "clean"],
+    decision = "prompt",
+    justification = "Git clean can delete untracked user files and should be explicitly reviewed.",
+    match = ["git clean -fd"],
+)
